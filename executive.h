@@ -1,7 +1,7 @@
 /**
  * @file executive.h
- * @author AMEDEO BERTUZZI 340922
- * @author GIORGIA TEDALDI 339642
+ * @author AMEDEO BERTUZZI
+ * @author GIORGIA TEDALDI
  */
 
 #ifndef EXECUTIVE_H
@@ -21,44 +21,44 @@ class Executive
 {
 	public:
 		/* 
-			Inizializza l'executive, impostando i parametri di scheduling:
-			num_tasks: numero totale di task presenti nello schedule;
-			frame_length: lunghezza del frame (in quanti temporali);
-			unit_duration: durata dell'unita di tempo, in millisecondi (default 10ms).
+			Executive initialization and parameters set up:
+			num_tasks: total number of tasks in the schedule;
+			frame_length: frame's lenght;
+			unit_duration: unit time duration, in milliseconds (default 10ms).
 		*/
 		Executive(size_t num_tasks, unsigned int frame_length, unsigned int unit_duration = 10);
 
 		/* 
-			Imposta il task periodico di indice "task_id" (da invocare durante la creazione dello schedule):
-			task_id: indice progressivo del task, nel range [0, num_tasks);
-			periodic_task: funzione da eseguire al rilascio del task;
-			wcet: tempo di esecuzione di caso peggiore (in quanti temporali).
+			Function to set the periodic task with index "task_id" (to be called during the schedule's creation):
+			task_id: progressive index of the task, in range [0, num_tasks);
+			periodic_task: function to executed when task is realised;
+			wcet: worst case execution time.
 		*/
 		void set_periodic_task(size_t task_id, std::function<void()> periodic_task, unsigned int wcet);
 		
 		/* 
-			Imposta il task aperiodico (da invocare durante la creazione dello schedule):
-			aperiodic_task: funzione da eseguire al rilascio del task;
-			wcet: tempo di esecuzione di caso peggiore (in quanti temporali).
+			Function to set the aperiodic task (to call during the schedule's creation):
+			aperiodic_task: function to execute when the task is released;
+			wcet: worst case execution time.
 		*/
 		void set_aperiodic_task(std::function<void()> aperiodic_task, unsigned int wcet);
 		
 		/* 
-			Lista di task da eseguire in un dato frame (da invocare durante la creazione dello schedule):
-			frame: lista degli id corrispondenti ai task da eseguire nel frame, in sequenza.
+			List of tasks to execute in a specific frame (to call during the schedule's creation)
+			frame: ordered list of task's id to execute in the frame.
 		*/
 		void add_frame(std::vector<size_t> frame);
 
-		/* Esegue l'applicazione */
+		/* Function to execute the application */
 		void run();
 		
 		/* 
-			Richiede il rilascio del task aperiodico (da invocare durante l'esecuzione).
+			Function to request aperiodic task release (to call during the execution).
 		*/
 		void ap_task_request();
 
 	private:
-		enum thread_type {PERIODIC, APERIODIC}; //utilizzato solo per la stampa di debug
+		enum thread_type {PERIODIC, APERIODIC}; //used to print debug info
 		enum thread_state {PENDING, IDLE, RUNNING};
 
 		std::mutex state_mutex;
@@ -80,15 +80,16 @@ class Executive
 		task_data ap_task;
 		
 		std::vector< std::vector<size_t> > frames;
-		std::vector<size_t> slack_times; //vettore che contiene i vari slack time dei diversi frame
+	
+		std::vector<size_t> slack_times; //vector that contains slack times of the different frames
 		
-		const unsigned int frame_length; // lunghezza del frame (in quanti temporali)
-		const std::chrono::milliseconds unit_time; // durata dell'unita di tempo (quanto temporale)		
+		const unsigned int frame_length; // frames' length
+		const std::chrono::milliseconds unit_time; // unit time duration		
 
-		bool ap_request; //flag per la richiesta di attivazione dell'aperiodico		
-
+		bool ap_request; //flag to request the activation of the aperiodic task
+	
 		/**
-		 * Funzione per settare la priorità del thread.
+		 * Function to set the thread's priority.
 		 */
 		void set_thread_priority(std::thread &th, rt::priority &p); 
 
