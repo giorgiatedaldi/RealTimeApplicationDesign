@@ -15,8 +15,8 @@ The execution of the aperiodic takes place in the slack time present in the fram
 The execution of the aperiodic task is considered correct when it ends within the number of frames specified in the release request.
 
 ### Authors
-- GIORGIA TEDALDI: giorgia.tedaldi@studenti.unipr.it
-- AMEDEO BERTUZZI: amedeo.bertuzzi@studenti.unipr.it
+- Giorgia Tedaldi: giorgia.tedaldi@studenti.unipr.it
+- Amedeo Bertuzzi: amedeo.bertuzzi@studenti.unipr.it
 
 
 
