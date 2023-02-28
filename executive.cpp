@@ -1,7 +1,7 @@
 /**
  * @file executive.cpp
- * @author AMEDEO BERTUZZI 340922
- * @author GIORGIA TEDALDI 339642
+ * @author AMEDEO BERTUZZI 
+ * @author GIORGIA TEDALDI 
  */
 
 #include <cassert>
@@ -20,7 +20,7 @@ Executive::Executive(size_t num_tasks, unsigned int frame_length, unsigned int u
 
 void Executive::set_periodic_task(size_t task_id, std::function<void()> periodic_task, unsigned int wcet)
 {
-	assert(task_id < p_tasks.size()); // Fallisce in caso di task_id non corretto (fuori range)
+	assert(task_id < p_tasks.size()); //It fails if task_id is not correct (out of range)
 	
 	p_tasks[task_id].function = periodic_task;
 	p_tasks[task_id].wcet = wcet;
@@ -41,7 +41,7 @@ void Executive::set_aperiodic_task(std::function<void()> aperiodic_task, unsigne
 void Executive::add_frame(std::vector<size_t> frame)
 {
 	for (auto & id: frame)
-		assert(id < p_tasks.size()); // Fallisce in caso di task_id non corretto (fuori range)
+		assert(id < p_tasks.size()); //It fails if task_id is not correct (out of range)
 	
 	frames.push_back(frame);
 
@@ -51,29 +51,30 @@ void Executive::add_frame(std::vector<size_t> frame)
 		tot_wcet += p_tasks[frame[i]].wcet;
 	}
 
-	slack_times.push_back(frame_length-tot_wcet); //costruzione del vettore contenente i vari slack time precalcolati
+	slack_times.push_back(frame_length-tot_wcet); //Vector's construction that contains pre-computed slack-times
 }
 
-//RUN DI START
+//START RUN
 void Executive::run()
 {
-	//INIZIALIZZAZIONE EXECUTIVE THREAD
+	//EXECUTIVE THREAD INITIALIZATION
 	rt::priority exec_prio(rt::priority::rt_max);
 	rt::affinity aff("1");
 
 
-	//INIZIALIZZAZIONE PERIODIC TASK THREAD
+	//PERIODIC TASK THREAD INITIALIZATION
 	for (size_t id = 0; id < p_tasks.size(); ++id)
 	{
-		assert(p_tasks[id].function); // Fallisce se set_periodic_task() non e' stato invocato per questo id
+		
+		assert(p_tasks[id].function); //It fails if set_periodic_task() has not been invoked for this id
 		
 		p_tasks[id].thread = std::thread(&Executive::task_function, std::ref(p_tasks[id]), std::ref(state_mutex));
 
 	}
 	
 
-	//INIZIALIZZAZIONE APERIODIC TASK THREAD
-	assert(ap_task.function); // Fallisce se set_aperiodic_task() non e' stato invocato
+	//APERIODIC TASK THREAD INITIALIZATION
+	assert(ap_task.function); // It fails if set_aperiodic_task() has not been invoked
 	
 	ap_task.thread = std::thread(&Executive::task_function, std::ref(ap_task), std::ref(state_mutex));
 	rt::priority a_prio(rt::priority::rt_min);
@@ -87,7 +88,7 @@ void Executive::run()
 	rt::set_affinity(exec_thread, aff);
 	
 	
-	//JOIN FINALI
+	//FINAL JOIN
 	exec_thread.join();
 	
 	ap_task.thread.join();
@@ -168,7 +169,7 @@ void Executive::task_function(Executive::task_data & task,  std::mutex &state_mu
 	}
 }
 
-//FUNZIONE DEL THREAD ESECUTIVO
+//EXECUTIVE THREAD
 void Executive::exec_function()
 {
 	unsigned long frame_id = 0;
@@ -185,7 +186,7 @@ void Executive::exec_function()
 		std::cout << debug.str();
 		
 
-		//Controllo di ap_request
+		//ap_request check
 		{
 			std::unique_lock<std::mutex> lock(ap_request_mutex);
 			if(ap_request)
@@ -205,21 +206,21 @@ void Executive::exec_function()
 
 
 		//SET PRIORITY & WAKE-UP TASK
-		//La priorità dei task viene settata dinamicamente ogni frame.
+		//Tasks' priority is set dinamiccaly in each frame.
 		/**
-		 * GESTIONE DELLE PRIORITA
+		 * PRIORITY MANAGMENT
 		 * 
-		 * L'executive ha sempre priorità massima.
-		 * Se un ap_running viene utilizzata la politica di slack stealing: durante lo slack time gli eventuali
-		 * thread periodici in deadline miss hanno tutti priorità pari a (MAX - 1), mentre l'apriodico (MAX - 2), mentre 
-		 * i periodici da schedulare nel frame hanno priorità inferiore.
-		 * Alla fine dello slack time, al risveglio dell'executive, la priorità dell'apriodico viene settata a MIN,
-		 * quella di eventuali periodici in deadline miss tutti a (MIN + 1), mentre quella degli altri task periodici sarà superiore
-		 * e definita in base all'ordine di esecuzione.
+		 * Executive has always the maximum priority.
+		 * If in ap_running the policy used is 'slack stealing': during the slack time any periodic task in deadline miss has
+		 * priority equal to (MAX - 1), the aperiodic task has priority (MAX - 2), while the periodic tasks to schedule in the frame
+		 * have lower priority.
+		 * At the end of slack time, when the executive wakes up, the aperiodic task's priority is set to MIN,
+		 * the one of any periodic task in deadline miss to (MIN + 1), while the one of the other periodic task will be higher
+		 * and defined according to the established order execution.
 		 * 
-		 * In particolare: se un task è in deadline miss e presenta un esecuzione anche nel frame successivo la
-		 * sua esecuzione viene saltata. Il task in questione esegue nell'eventuale tempo rimasto alla fine del frame (e/o nello slack time), 
-		 * in modo da evitare anche il ritardo degli altri task periodici.
+		 * In particular: if a task is in deadline miss and it has an execution even in the next fram, then its execution is skipped.
+		 * The task in question executes in any remaining time at the end of the frame (and / or in the slack time) in order to avoid
+		 * delaying periodic tasks.
 		 * 
 		 */
 		rt::priority thread_prio(rt::priority::rt_max);
@@ -281,7 +282,7 @@ void Executive::exec_function()
 			debug << "-----Exec Sleeping for SLACK TIME-----" << std::endl;
 			std::cout << debug.str();
 
-			//Executive dorme per slack_time
+			//Executive sleeps for slack_time
 			next_frame += std::chrono::milliseconds(slack_times[frame_id]*unit_time);
 			std::this_thread::sleep_until(next_frame);
 			
@@ -293,8 +294,7 @@ void Executive::exec_function()
 			debug1 << "-----Exec: end slack time" << elapsed.count() << "-----"<< std::endl;
 			std::cout << debug1.str();
 
-			//si sveglia e cambia la priorità all'aperiodico e ai periodici in deadline miss
-			prio = rt::priority::rt_min;
+			//Executive wakes up and updates priority to the aperiodic task and to any periodic task in deadline miss.
 			set_thread_priority(ap_task.thread, prio);
 			
 			++prio;
@@ -371,7 +371,7 @@ void Executive::exec_function()
 		std::cout << debug3.str();
 		
 
-		//AVANZAMENTO FRAME
+		//FRAME ADVANCE
 		if (++frame_id == frames.size())
 		{
 			frame_id = 0;
