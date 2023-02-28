@@ -1,7 +1,7 @@
 /**
  * @file application-err_p.cpp
- * @author AMEDEO BERTUZZI 340922
- * @author GIORGIA TEDALDI 339642
+ * @author AMEDEO BERTUZZI 
+ * @author GIORGIA TEDALDI 
  */
 
 #include "executive.h"
@@ -77,7 +77,7 @@ void task4()
 	std::cout << debug.str();
 }
 
-/* Nota: nel codice di uno o piu' task periodici e' lecito chiamare Executive::ap_task_request() */
+/* Note: in the code of one or more periodic task it is allowed to call Executive::ap_task_request() */
 
 void ap_task()
 {
