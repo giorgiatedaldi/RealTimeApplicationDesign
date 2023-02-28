@@ -8,7 +8,7 @@ The executive is able to manage the execution of tasks by activating himself onl
 - Check that the periodic tasks of the previous frame have finished;
 - Manage the execution of aperiodic tasks avoiding interference with the schedule; 
 - Detect and report any missing deadlines.
-To achive this goals synchronization mechanisms such as condition variables and mutexes are used.
+To acheive this goals synchronization mechanisms such as condition variables and mutexes are used.
 
 ### Aperiodic Task
 The execution of the aperiodic takes place in the slack time present in the frames immediately following the release one, without interfering with periodic tasks deadlines. 
